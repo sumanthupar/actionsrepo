@@ -48,12 +48,3 @@ jobs:
           git add status.txt
           git commit -m "Update as per pipeline"
           git push
-          
-      - name: Update status.txt
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
