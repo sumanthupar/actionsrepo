@@ -29,13 +29,14 @@ jobs:
       # Runs a single command using the runners shell
       - name: Read variables from values.env
         run: |
-          set -o allexport; source custom.env; set +o allexport
-          echo "user $user"
+          set -o allexport; source values.env; set +o allexport
+          echo "user $username"
           echo "API $API"
       - name: Use variable in different step
         run: |
-          echo "anaother user $user"
-          echo "another API $api"
+          echo "anaother user $username"
+          echo "another API $API"
+          
       - name: Run a one-line script
         run: echo Hello, world!
 
