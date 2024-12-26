@@ -35,10 +35,13 @@ jobs:
         
       - name: Use variable in different step
         run: |
-          echo "anaother user $username"
-          echo "another API $API"
+          sed -i "s/from=.*/from=$from/" status.txt
+          sed -i "s/to=.*/to=$to/" status.txt
+          echo "###############"
+          cat status.txt
+          echo "###############"
           
-      - name: Run a one-line script
+      - name: Update status.txt
         run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
