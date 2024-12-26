@@ -33,13 +33,19 @@ jobs:
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
         
-      - name: Use variable in different step
+      - name: Use variable in different step and update existing file
         run: |
           sed -i "s/from=.*/from=$from/" status.txt
           sed -i "s/to=.*/to=$to/" status.txt
           echo "###############"
           cat status.txt
           echo "###############"
+          
+      - name: Commit changes
+        run: |
+          git add status.txt
+          git commit -m "Update as per pipeline"
+          git push
           
       - name: Update status.txt
         run: echo Hello, world!
