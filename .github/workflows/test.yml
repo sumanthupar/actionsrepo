@@ -29,9 +29,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: Read variables from values.env
         run: |
-          set -o allexport; source values.env; set +o allexport
-          echo "user $username"
-          echo "API $API"
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < values.env
+        
       - name: Use variable in different step
         run: |
           echo "anaother user $username"
