@@ -38,6 +38,9 @@ jobs:
           JF_URL: ${{ env.JF_URL }}
         with:
           oidc-provider-name: sumgithub
+          
+      - name: list repo 
+        run: jf rt curl -s -k -XGET "/api/repositories?type=local"
 
       # Runs a single command using the runners shell
       - name: Read variables from values.env
