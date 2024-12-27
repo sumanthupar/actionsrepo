@@ -40,7 +40,7 @@ jobs:
           API_KEY=${{ secrets.MAINJF_API }}
           ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
-          [ "$response" -eq 200 ] && main_status=success || main_status=fail
+          [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
 
           ###Ping check to SAAS_DR
          # DRUSERNAME=${{ secrets.DRJF_USERNAME }}
