@@ -33,6 +33,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: check env
+        run: |
+          echo "env variable is ${{ vars.MAINJF_URL }}"
+
       - name: Ping check to artifactory
         env:
           JF_URL: ${{ vars.JF_URL }}
