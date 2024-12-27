@@ -56,10 +56,8 @@ jobs:
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
-          canUpdateDRFromFile=$canUpdateDR
-          echo "canUpdateDR $canUpdateDR"
-          echo "canUpdateDRFromFile $canUpdateDRFromFile"
-          if [ $main_status == "success" ] && [ ${canUpdateDRFromFile} == "true" ];then
+          #canUpdateDRFromFile=$canUpdateDR
+          if [ $main_status == "success" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
