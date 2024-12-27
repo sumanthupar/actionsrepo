@@ -49,10 +49,23 @@ jobs:
           #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
  
-      - name: print previous outputs
+      - name: Update status.yaml
         run: |
-          echo "main_status $main_status"
-          echo "dr_status $dr_status"
+          epochNow=$(date +%s)
+          if [ $main_status == "success" ];then
+            sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
+            sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
+          else
+            sed -i "s/canUpdateDR=.*/canUpdateDR=false/" status.txt
+            sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
+          fi
+      - name: Commit changes
+        run: |
+          git config user.name "sumanthupar"
+          git config user.email "sumanthupar@gmail.com"
+          git add status.txt
+          git commit -m "Update as per pipeline"
+          git push
 
 
            
