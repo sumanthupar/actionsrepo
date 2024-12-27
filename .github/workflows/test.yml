@@ -24,8 +24,6 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment: myenv
-    #env:
-     # JF_URL: "http://afea82db39000420db03dfd59f6ac222-268493901.ap-south-1.elb.amazonaws.com"
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -49,10 +47,17 @@ jobs:
           #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
  
+      - name: Read variables from status.txt
+        run: |
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < values.env
+          
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
-          if [ $main_status == "success" ];then
+          canUpdateDRFromFile=$canUpdateDR
+          if [ $main_status == "success" ] && [ ${canUpdateDRFromFile} == "true" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
           else
