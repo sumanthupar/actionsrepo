@@ -51,18 +51,22 @@ jobs:
         run: |
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
-          done < values.env
+          done < status.txt
           
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
           canUpdateDRFromFile=$canUpdateDR
+          echo "canUpdateDR $canUpdateDR"
+          echo "canUpdateDRFromFile $canUpdateDRFromFile"
           if [ $main_status == "success" ] && [ ${canUpdateDRFromFile} == "true" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
           else
             sed -i "s/canUpdateDR=.*/canUpdateDR=false/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=/" status.txt
           fi
       - name: Commit changes
         run: |
