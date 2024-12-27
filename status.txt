@@ -2,6 +2,6 @@
 canUpdateDR=false
 # Tuesday, 20 September 2022 14:17:04.490
 lastHeartBeatFromMain=
-requestDateTime=1663683424
+requestDateTime=
 from=SAAS_DRnew
 to=SAAS_MAINnew
