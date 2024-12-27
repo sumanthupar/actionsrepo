@@ -33,6 +33,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Ping check to artifactory
+        run: |
+          USERNAME=${{ secrets.MAINJF_USERNAME }}
+          API_KEY=${{ secrets.MAINJF_API }}
+          ARTIFACTORY_URL=${{ vars.JF_URL }}
+          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          [ "$response" -eq 200 ] && echo "OK" || echo "Not reachable" 
+
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:  
