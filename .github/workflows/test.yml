@@ -24,8 +24,6 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment: myenv
-    env:
-      JF_URL: ${{ vars.JF_URL }}
     #env:
      # JF_URL: "http://afea82db39000420db03dfd59f6ac222-268493901.ap-south-1.elb.amazonaws.com"
 
@@ -36,17 +34,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ping check to artifactory
+        env:
+          JF_URL: ${{ vars.JF_URL }}
         run: |
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
-          ARTIFACTORY_URL=${{ vars.JF_URL }}
+          ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$response" -eq 200 ] && echo "OK" || echo "Not reachable" 
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:  
-          JF_URL: ${{ vars.JF_URL }}
+          JF_URL: ${{ vars.MAINJF_URL }}
         with:
           oidc-provider-name: sumgithub
           
