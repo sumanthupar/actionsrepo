@@ -35,44 +35,24 @@ jobs:
 
       - name: Ping check to artifactory
         run: |
+          ###Ping check to SAAS_MAIN
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
           ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
-          [ "$response" -eq 200 ] && echo "OK" || echo "Not reachable" 
+          [ "$response" -eq 200 ] && main_status=success || main_status=fail
 
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:  
-          JF_URL: ${{ vars.MAINJF_URL }}
-        with:
-          oidc-provider-name: sumgithub
-          
-      - name: list repo 
-        run: jf rt curl -s -k -XGET "/api/repositories?type=local"
-
-      # Runs a single command using the runners shell
-      - name: Read variables from values.env
+          ###Ping check to SAAS_DR
+         # DRUSERNAME=${{ secrets.DRJF_USERNAME }}
+          #DRAPI_KEY=${{ secrets.DRJF_API }}
+          #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
+          #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
+ 
+      - name: print previous outputs
         run: |
-          while IFS='=' read -r key value; do
-          echo "$key=$value" >> $GITHUB_ENV
-          done < values.env
-        
-      - name: Use variable in different step and update existing file
-        run: |
-          sed -i "s/from=.*/from=$from/" status.txt
-          sed -i "s/to=.*/to=$to/" status.txt
-          echo "###############"
-          cat status.txt
-          echo "###############"
-          
-      - name: Commit changes
-        run: |
-          git config user.name "sumanthupar"
-          git config user.email "sumanthupar@gmail.com"
-          git add status.txt
-          git commit -m "Update as per pipeline"
-          git push
+          echo "main_status $main_status"
+          echo "dr_status $dr_status"
 
 
            
