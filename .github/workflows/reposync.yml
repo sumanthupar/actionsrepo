@@ -5,7 +5,10 @@ name: CI
 # Controls when the workflow will run
 on:
   workflow_dispatch:
-
+  push:
+    branches: [ "main2dr" ]
+  pull_request:
+    branches: [ "main2dr" ]
 #  schedule:
 #    - cron: "* */2 * * *" ##Running every 15min
 
@@ -38,9 +41,7 @@ jobs:
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
-
-
-
+          
       - name: Ping check to artifactory
         run: |
           set +e
@@ -62,8 +63,37 @@ jobs:
           
       - name: Check conditions before proceeding
         run: |
-          requestDateTime=$(requestDateTime)
+          set +e
+          requestDateTime=$requestDateTime
           echo "requestDateTime $requestDateTime"
+          if [ $requestDateTime == "" ]; then 
+            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          echo "canUpdateDR $canUpdateDR"
+          if [ $canUpdateDR == "" ];then
+            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          epochNow=$(date +%s)
+          interval=$(expr $epochNow - $requestDateTime)
+          echo $epochNow
+          echo $requestDateTime
+          echo $interval
+          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
+            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
+            exit 1
+          fi
+          if [[ $canUpdateDR == "false" ]] ; then
+            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
+            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
+            exit 2
+          fi
+          
+        
+          
+          
+          
 
 
            
