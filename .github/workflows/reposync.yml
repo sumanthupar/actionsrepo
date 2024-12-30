@@ -87,6 +87,11 @@ jobs:
           if [[ $canUpdateDR == "false" ]] ; then
             echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
             #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.everest-preview+json" \
+              https://api.github.com/repos/${{ github.repository }}/dispatches \
+              -d '{"event_type": "trigger-my-workflow"}'
             exit 2
           fi
           
