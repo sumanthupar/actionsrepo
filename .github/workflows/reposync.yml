@@ -4,11 +4,12 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  workflow_dispatch:
-  push:
-    branches: [ "main2dr" ]
-  pull_request:
-    branches: [ "main2dr" ]
+  repository_dispatch:
+    types: [trigger-my-workflow]
+#  push:
+ #   branches: [ "dr2main" ]
+  #pull_request:
+#    branches: [ "dr2main" ]
 #  schedule:
 #    - cron: "* */2 * * *" ##Running every 15min
 
