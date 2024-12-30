@@ -56,8 +56,9 @@ jobs:
           ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
           #ARTIFACTORY_URL=$MAINJF_URL
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          echo "resonse $response"
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
-
+          echo "main_status $main_status"
           ###Ping check to SAAS_DR
           #DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           #DRAPI_KEY=${{ secrets.DRJF_API }}
@@ -68,6 +69,7 @@ jobs:
           
       - name: Update status.yaml
         run: |
+          echo "hi"
           epochNow=$(date +%s)
           #canUpdateDRFromFile=$canUpdateDR
           if [ $main_status == "success" ];then
