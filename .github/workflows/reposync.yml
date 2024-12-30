@@ -62,7 +62,7 @@ jobs:
           
       - name: Check conditions before proceeding
         run: |
-          requestDateTime=$(requestDateTime)
+          requestDateTimenew=$requestDateTime
           echo "requestDateTime $requestDateTime"
 
 
