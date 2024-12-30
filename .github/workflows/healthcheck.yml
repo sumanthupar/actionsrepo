@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: [ "main", "main2dr" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "main2dr" ]
 #  schedule:
 #    - cron: "0/15 * * * *" ##Running every 15min
       
@@ -60,18 +60,18 @@ jobs:
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_DR
-          #DRUSERNAME=${{ secrets.DRJF_USERNAME }}
-          #DRAPI_KEY=${{ secrets.DRJF_API }}
-          #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
-          #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
-          #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
+          DRUSERNAME=${{ secrets.DRJF_USERNAME }}
+          DRAPI_KEY=${{ secrets.DRJF_API }}
+          DRARTIFACTORY_URL=${{ vars.DRF_URL }}
+          responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
 
           
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
           #canUpdateDRFromFile=$canUpdateDR
-          if [ $main_status == "success" ];then
+          if [ $main_status == "success" -a $dr_status == "success" ] ;then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
