@@ -73,6 +73,7 @@ jobs:
           echo "hi"
           epochNow=$(date +%s)
           #canUpdateDRFromFile=$canUpdateDR
+          echo "main_status $main_status"
           if [ $main_status == "success" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
