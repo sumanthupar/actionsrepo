@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: [ "main2dr" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main2dr" ]
 #  schedule:
 #    - cron: "0/15 * * * *" ##Running every 15min
       
