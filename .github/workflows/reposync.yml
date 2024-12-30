@@ -5,7 +5,10 @@ name: CI
 # Controls when the workflow will run
 on:
   workflow_dispatch:
-
+  push:
+    branches: [ "main2dr" ]
+  pull_request:
+    branches: [ "main2dr" ]
 #  schedule:
 #    - cron: "* */2 * * *" ##Running every 15min
 
@@ -40,7 +43,10 @@ jobs:
           done < values.env
 
 
-
+      - name: print values
+        run: |
+          echo "lastHeartBeatFromMain $lastHeartBeatFromMain"
+          
       - name: Ping check to artifactory
         run: |
           set +e
