@@ -65,13 +65,17 @@ jobs:
           DRARTIFACTORY_URL=${{ vars.DRF_URL }}
           responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
+          echo "responsedr $responsedr"
+          echo "response $response"
 
           
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
           #canUpdateDRFromFile=$canUpdateDR
-          if [ $main_status == "success" -a $dr_status == "success" ] ;then
+          echo "main_status $main_status"
+          echo "dr_status $dr_status"
+          if [ "$main_status" == "success" -a "$dr_status" == "success" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
