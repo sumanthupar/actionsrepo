@@ -52,15 +52,6 @@ jobs:
 
       - name: Ping check to artifactory
         run: |
-          #set +e
-          ###Ping check to SAAS_MAIN
-          USERNAME=${{ secrets.MAINJF_USERNAME }}
-          API_KEY=${{ secrets.MAINJF_API }}
-          ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
-          #ARTIFACTORY_URL=$MAINJF_URL
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
-          [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
-          
           ###Ping check to SAAS_DR
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
@@ -70,6 +61,17 @@ jobs:
           [ $responsedr -eq 200 ] && echo "dr_status=success" >> $GITHUB_ENV || echo "dr_status=fail" >> $GITHUB_ENV
           echo "responsedr $responsedr"
           echo "response $response"
+
+          
+          #set +e
+          ###Ping check to SAAS_MAIN
+          USERNAME=${{ secrets.MAINJF_USERNAME }}
+          API_KEY=${{ secrets.MAINJF_API }}
+          ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
+          #ARTIFACTORY_URL=$MAINJF_URL
+          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
+          
 
           
       - name: Update status.yaml
