@@ -1,0 +1,92 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  repository_dispatch:
+    types: [trigger-my-workflow]
+#  push:
+ #   branches: [ "dr2main" ]
+  #pull_request:
+#    branches: [ "dr2main" ]
+#  schedule:
+#    - cron: "* */2 * * *" ##Running every 15min
+
+permissions:
+  id-token: write
+  contents: write
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: myenv
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: read all the values from values.env and store it in Github env
+        run: |
+          #Read from file status.txt
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < status.txt
+          
+          #Read from file values.env
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < values.env
+          
+      - name: Ping check to artifactory
+        run: |
+          set +e
+          ###Ping check to SAAS_MAIN
+          USERNAME=${{ secrets.MAINJF_USERNAME }}
+          API_KEY=${{ secrets.MAINJF_API }}
+          ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
+          #ARTIFACTORY_URL=$MAINJF_URL
+          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
+          
+          ###Ping check to SAAS_DR
+          #DRUSERNAME=${{ secrets.DRJF_USERNAME }}
+          #DRAPI_KEY=${{ secrets.DRJF_API }}
+          #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
+          #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
+
+          
+      - name: Check conditions before proceeding
+        run: |
+          set +e
+          requestDateTime=$requestDateTime
+          echo "requestDateTime $requestDateTime"
+          if [ $requestDateTime == "" ]; then 
+            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          echo "canUpdateDR $canUpdateDR"
+          if [ $canUpdateDR == "" ];then
+            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          epochNow=$(date +%s)
+          interval=$(expr $epochNow - $requestDateTime)
+          echo $epochNow
+          echo $requestDateTime
+          echo $interval
+          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
+            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
+            exit 1
+          fi
+          if [[ $canUpdateDR == "false" ]] ; then
+            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
+            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
+            exit 2
+          fi
