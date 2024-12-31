@@ -52,6 +52,7 @@ jobs:
 
       - name: Ping check to artifactory
         run: |
+          set +e
           ###Ping check to SAAS_DR
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
@@ -63,7 +64,7 @@ jobs:
           echo "response $response"
 
           
-          #set +e
+          
           ###Ping check to SAAS_MAIN
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
