@@ -65,6 +65,7 @@ jobs:
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
           #DRARTIFACTORY_URL=$DRJF_URL
+          curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRJF_URL}/artifactory/api/system/ping
           responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRJF_URL}/artifactory/api/system/ping")
           [ $responsedr -eq 200 ] && echo "dr_status=success" >> $GITHUB_ENV || echo "dr_status=fail" >> $GITHUB_ENV
           echo "responsedr $responsedr"
