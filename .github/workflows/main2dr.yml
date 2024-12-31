@@ -6,9 +6,9 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches: [ "main2dr" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main2dr" ]
+    branches: [ "main" ]
 #  schedule:
 #    - cron: "* */2 * * *" ##Running every 15min
 
@@ -54,46 +54,155 @@ jobs:
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_DR
-          #DRUSERNAME=${{ secrets.DRJF_USERNAME }}
-          #DRAPI_KEY=${{ secrets.DRJF_API }}
-          #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
-          #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
-          #[ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
+          DRUSERNAME=${{ secrets.DRJF_USERNAME }}
+          DRAPI_KEY=${{ secrets.DRJF_API }}
+          DRARTIFACTORY_URL=${{ vars.DRF_URL }}
+          responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
 
           
-      - name: Check conditions before proceeding
+    #  - name: Fail workflow if SAAS main is down
+    #    run:
+    #      if [ $main_status" == "fail" ];then
+#		echo "SAAS Main is down. Exiting"
+#		exit 1
+#          fi
+
+      - name: Setup JFrog CLI for SAAS main
+        uses: jfrog/setup-jfrog-cli@v4
+        env:  
+          JF_URL: ${{ vars.MAINJF_URL }}
+        with:
+          oidc-provider-name: sumgithub
+          custom-server-id: ${{ vars.jpdMain }}
+
+      -  name: Setup JFrog CLI SAAS DR
+         uses: jfrog/setup-jfrog-cli@v4
+         env:  
+          JF_URL: ${{ vars.DRJF_URL }}
+         with:
+           oidc-provider-name: destgithub
+           custom-server-id: ${{ vars.jpdDr }}
+
+      - name: print jf c s
         run: |
-          set +e
-          requestDateTime=$requestDateTime
-          echo "requestDateTime $requestDateTime"
-          if [ $requestDateTime == "" ]; then 
-            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
-            exit 1
-          fi
-          echo "canUpdateDR $canUpdateDR"
-          if [ $canUpdateDR == "" ];then
-            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
-            exit 1
-          fi
-          epochNow=$(date +%s)
-          interval=$(expr $epochNow - $requestDateTime)
-          echo $epochNow
-          echo $requestDateTime
-          echo $interval
-          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
-            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
-            exit 1
-          fi
-          if [[ $canUpdateDR == "false" ]] ; then
-            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
-            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
-            exit 2
-          fi
-          
-        
-          
-          
-          
+          jf c s
+
+     
+
+#      - name: Check conditions before proceeding
+#        run: |
+#          set +e
+#          requestDateTime=$requestDateTime
+#          echo "requestDateTime $requestDateTime"
+#          if [ $requestDateTime == "" ]; then 
+#            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+#            exit 1
+#          fi
+#          echo "canUpdateDR $canUpdateDR"
+#          if [ $canUpdateDR == "" ];then
+#            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+#            exit 1
+#          fi
+#          epochNow=$(date +%s)
+#          interval=$(expr $epochNow - $requestDateTime)
+#          echo $epochNow
+#          echo $requestDateTime
+#          echo $interval
+#          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
+#            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
+#            exit 1
+#          fi
+#          if [[ $canUpdateDR == "false" ]] ; then
+#            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
+#            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
+#            curl -X POST \
+#              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+#              -H "Accept: application/vnd.github.everest-preview+json" \
+#              https://api.github.com/repos/${{ github.repository }}/dispatches \
+#              -d '{"event_type": "trigger-my-workflow"}'
+#            exit 2
+#          fi
+#
+#      - name: CreateUpdateProjects
+#        run: |
+#	  ###TBD
+#          /root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
+#
+#      - name: createLocalRepositories
+#	if: success()
+#        run: |
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
+#	  do
+#		jf {{ .Values.cliPlugin.name }} create local {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#          done
+#          jf {{ .Values.cliPlugin.name }} create local {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#
+#      - name: createRemoteRepositories
+#        if: success()
+#        run: |
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
+#          do
+#                jf {{ .Values.cliPlugin.name }} create remote {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#          done
+#          jf {{ .Values.cliPlugin.name }} create remote {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#
+#     - name: createVirtualRepositories
+#        if: success()
+#        run: |
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
+#          do
+#                jf {{ .Values.cliPlugin.name }} create virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#          done
+#          jf {{ .Values.cliPlugin.name }} create virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#
+#     - name: UpdateLocalRepositories
+#       run: |
+#         i=0
+#         N=50
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#	 do
+#		jf {{ .Values.cliPlugin.name }} update local {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#		i=`expr $i + 1`
+#		if [[ `expr $i % $N` == 0 ]]; then
+#			wait
+#		fi
+#		fi
+#	 done
+#
+#     - name: UpdateRemoteRepositories
+#       run: |
+#         i=0
+#         N=50
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#         do
+#                jf {{ .Values.cliPlugin.name }} update remote {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#                i=`expr $i + 1`
+#                if [[ `expr $i % $N` == 0 ]]; then
+#                        wait
+#                fi
+#                fi
+#         done
+#
+#     - name: UpdateVirtualRepositories
+#       run: |
+#         i=0
+#         N=50
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#         do
+#                jf {{ .Values.cliPlugin.name }} update virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#                i=`expr $i + 1`
+#                if [[ `expr $i % $N` == 0 ]]; then
+#                        wait
+#                fi
+#                fi
+#         done
 
 
-           
+
+
+
+
+
+
+          
