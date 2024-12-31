@@ -46,7 +46,9 @@ jobs:
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
 
-
+      - name: print values
+        run: |
+            echo "DRJF_URL $DRJF_URL"
 
       - name: Ping check to artifactory
         run: |
