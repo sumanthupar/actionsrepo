@@ -44,7 +44,7 @@ jobs:
           
       - name: Ping check to artifactory
         run: |
-          set +e
+          #set +e
           ###Ping check to SAAS_MAIN
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
