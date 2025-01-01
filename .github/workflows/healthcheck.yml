@@ -60,7 +60,9 @@ jobs:
           #ARTIFACTORY_URL=$MAINJF_URL
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
-    
+          echo "responsedr $responsedr"
+          echo "response $response"
+          
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
