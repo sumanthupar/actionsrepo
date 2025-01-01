@@ -71,6 +71,10 @@ jobs:
 #		exit 1
 #          fi
 
+      - name: debug
+        run: |
+          echo "MAINJF_URL $MAINJF_URL"
+        
       - name: Setup JFrog CLI for SAAS main
         uses: jfrog/setup-jfrog-cli@v4
         env:  
