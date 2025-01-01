@@ -44,12 +44,13 @@ jobs:
           
       - name: Ping check to artifactory
         run: |
-          #set +e
+          ##Setting below to avoid failing complete pipeline
+          set +e
           ###Ping check to SAAS_MAIN
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
           #ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
-          ARTIFACTORY_URL=`echo $MAINJF_URL`
+          ARTIFACTORY_URL=${{ env.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
           
@@ -57,23 +58,16 @@ jobs:
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
           #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
-          DRARTIFACTORY_URL=`echo $DRJF_URL`
+          DRARTIFACTORY_URL=${{ env.DRJF_URL }}
           responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
-          echo "response $response"
-          echo "responsedr $responsedr"
-
-          
-    #  - name: Fail workflow if SAAS main is down
-    #    run:
-    #      if [ $main_status" == "fail" ];then
-#		echo "SAAS Main is down. Exiting"
-#		exit 1
-#          fi
-
-      - name: debug
+ 
+      - name: Fail workflow if SAAS main is down
         run: |
-          echo "MAINJF_URL $MAINJF_URL"
+          if [ "$main_status" == "fail" ];then
+            echo "SAAS Main is down. Exiting"
+            exit 1
+          fi
         
       - name: Setup JFrog CLI for SAAS main
         uses: jfrog/setup-jfrog-cli@v4
@@ -87,7 +81,7 @@ jobs:
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
          env:  
-          #JF_URL: ${{ vars.DRJF_URL }}
+           #JF_URL: ${{ vars.DRJF_URL }}
            JF_URL: ${{ env.DRJF_URL }}
          with:
            oidc-provider-name: destgithub
@@ -97,42 +91,41 @@ jobs:
         run: |
           jf c s
 
-     
+      - name: Check conditions before proceeding
+        run: |
+          set +e
+          requestDateTime=$requestDateTime
+          echo "requestDateTime $requestDateTime"
+          if [ $requestDateTime == "" ]; then 
+            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          echo "canUpdateDR $canUpdateDR"
+          if [ $canUpdateDR == "" ];then
+            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
+            exit 1
+          fi
+          epochNow=$(date +%s)
+          interval=$(expr $epochNow - $requestDateTime)
+          echo $epochNow
+          echo $requestDateTime
+          echo $interval
+          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
+            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
+            exit 1
+          fi
+          if [[ $canUpdateDR == "false" ]] ; then
+            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
+            exit 1
+            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.everest-preview+json" \
+              https://api.github.com/repos/${{ github.repository }}/dispatches \
+              -d '{"event_type": "trigger-my-workflow"}'
+            exit 2
+          fi
 
-#      - name: Check conditions before proceeding
-#        run: |
-#          set +e
-#          requestDateTime=$requestDateTime
-#          echo "requestDateTime $requestDateTime"
-#          if [ $requestDateTime == "" ]; then 
-#            echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
-#            exit 1
-#          fi
-#          echo "canUpdateDR $canUpdateDR"
-#          if [ $canUpdateDR == "" ];then
-#            echo "[WARN] canUpdateDR properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
-#            exit 1
-#          fi
-#          epochNow=$(date +%s)
-#          interval=$(expr $epochNow - $requestDateTime)
-#          echo $epochNow
-#          echo $requestDateTime
-#          echo $interval
-#          if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
-#            echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
-#            exit 1
-#          fi
-#          if [[ $canUpdateDR == "false" ]] ; then
-#            echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
-#            #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
-#            curl -X POST \
-#              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-#              -H "Accept: application/vnd.github.everest-preview+json" \
-#              https://api.github.com/repos/${{ github.repository }}/dispatches \
-#              -d '{"event_type": "trigger-my-workflow"}'
-#            exit 2
-#          fi
-#
 #      - name: CreateUpdateProjects
 #        run: |
 #	  ###TBD
