@@ -115,7 +115,8 @@ jobs:
             echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
             #exit 1
           fi
-          if [[ $canUpdateDR == "false" ]] ; then
+          echo "111"
+          if [ $canUpdateDR == "false" ] ; then
             echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
             exit 1
             #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
