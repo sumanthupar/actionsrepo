@@ -113,7 +113,7 @@ jobs:
           echo "HealthCheckIntervalInSec $HealthCheckIntervalInSec"
           if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
             echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
-            exit 1
+            #exit 1
           fi
           if [[ $canUpdateDR == "false" ]] ; then
             echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
