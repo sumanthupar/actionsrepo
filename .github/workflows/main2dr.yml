@@ -109,7 +109,8 @@ jobs:
           interval=$(expr $epochNow - $requestDateTime)
           echo $epochNow
           echo $requestDateTime
-          echo $interval
+          echo "interval $interval"
+          echo "HealthCheckIntervalInSec $HealthCheckIntervalInSec"
           if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
             echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
             exit 1
