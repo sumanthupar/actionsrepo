@@ -79,19 +79,19 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v4
         env:  
           #JF_URL: ${{ vars.MAINJF_URL }}
-          JF_URL: ${MAINJF_URL}
+          JF_URL: ${env.MAINJF_URL}
         with:
           oidc-provider-name: sumgithub
-          custom-server-id: ${jpdMain}
+          custom-server-id: ${env.jpdMain}
 
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
          env:  
           #JF_URL: ${{ vars.DRJF_URL }}
-           JF_URL: ${DRJF_URL}
+           JF_URL: ${env.DRJF_URL}
          with:
            oidc-provider-name: destgithub
-           custom-server-id: ${jpdDr}
+           custom-server-id: ${env.jpdDr}
 
       - name: print jf c s
         run: |
