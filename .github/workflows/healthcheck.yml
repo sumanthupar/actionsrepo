@@ -7,13 +7,9 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main", "main2dr" ]
-  pull_request:
-    branches: [ "main", "main2dr" ]
 #  schedule:
 #    - cron: "0/15 * * * *" ##Running every 15min
-      
-
-  # Allows you to run this workflow manually from the Actions tab
+  
   workflow_dispatch:
 
 permissions:
@@ -46,10 +42,6 @@ jobs:
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
 
-      - name: print values
-        run: |
-            echo "DRJF_URL $DRJF_URL"
-
       - name: Ping check to artifactory
         run: |
           set +e
@@ -57,29 +49,22 @@ jobs:
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
           #DRARTIFACTORY_URL=${{ vars.DRJF_URL }}
-          DRARTIFACTORY_URL=`echo $DRJF_URL`
-          #curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}/artifactory/api/system/ping"
+          DRARTIFACTORY_URL=${{ env.DRJF_URL }}
           responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}/artifactory/api/system/ping")
           [ $responsedr -eq 200 ] && echo "dr_status=success" >> $GITHUB_ENV || echo "dr_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_MAIN
           USERNAME=${{ secrets.MAINJF_USERNAME }}
           API_KEY=${{ secrets.MAINJF_API }}
-          ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
+          ARTIFACTORY_URL=${{ env.MAINJF_URL }}
           #ARTIFACTORY_URL=$MAINJF_URL
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
-          echo "responsedr $responsedr"
-          echo "response $response"
-          
-
-          
+    
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
           #canUpdateDRFromFile=$canUpdateDR
-          echo "main_status $main_status"
-          echo "dr_status $dr_status"
           if [ "$main_status" == "success" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
             sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
@@ -89,6 +74,7 @@ jobs:
             #sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
           fi
+          
       - name: Commit changes
         run: |
           git config user.name "sumanthupar"
