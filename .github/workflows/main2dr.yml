@@ -135,8 +135,8 @@ jobs:
           jf plugin install ${projectPluginName}@${projectPluginVersion}
            
 
-     - name: CreateUpdateProjects
-       run: |
+      - name: CreateUpdateProjects
+        run: |
           jf ${projectPluginName} diff create $jpdMain $jpdDr
           #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
 
