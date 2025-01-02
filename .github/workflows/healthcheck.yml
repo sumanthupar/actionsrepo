@@ -82,7 +82,7 @@ jobs:
           git pull -f
           git add status.txt
           git commit -m "Update as per pipeline"
-          git push
+          git push origin main
 
 
            
