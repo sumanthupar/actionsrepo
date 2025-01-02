@@ -48,10 +48,12 @@ jobs:
           ###Ping check to SAAS_DR
           DRUSERNAME=${{ secrets.DRJF_USERNAME }}
           DRAPI_KEY=${{ secrets.DRJF_API }}
+          DR_PW=${{ vars.DR_P }}
           #DRARTIFACTORY_URL=${{ vars.DRJF_URL }}
           DRARTIFACTORY_URL=${{ env.DRJF_URL }}
-          curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping"
-          responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          curl -u sumanth:$DR_PW -X GET "http://k8s-kubesyst-jfrogpla-e63eb4f410-96a0822071d2c8bf.elb.ap-south-1.amazonaws.com/artifactory/api/system/ping"
+          #curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping"
+          #responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           [ $responsedr -eq 200 ] && echo "dr_status=success" >> $GITHUB_ENV || echo "dr_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_MAIN
