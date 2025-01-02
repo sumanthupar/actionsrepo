@@ -130,16 +130,10 @@ jobs:
       - name: Download and install plugin from Source artifactory
         run: |
           set +e
-          jf c s
-          
           export JFROG_CLI_PLUGINS_SERVER=$jpdDr
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
           sleep 1
-          echo "JFROG_CLI_PLUGINS_SERVER $JFROG_CLI_PLUGINS_SERVER"
-          echo "JFROG_CLI_PLUGINS_REPO $JFROG_CLI_PLUGINS_REPO"
-          echo "cliPluginName $cliPluginName"
-          echo "jpdDr $jpdDr"
           jf plugin install $cliPluginName@$cliPluginVersion
            
 
@@ -150,7 +144,8 @@ jobs:
 #          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
 #
       - name: createLocalRepositories
-        run: |     
+        run: |
+          API_KEY=${{ secrets.MAINJF_API }}
           curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s
           for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
@@ -161,6 +156,7 @@ jobs:
 
       - name: createRemoteRepositories
         run: |
+          API_KEY=${{ secrets.MAINJF_API }}
           for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
