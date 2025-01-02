@@ -130,7 +130,7 @@ jobs:
       - name: Download and install plugin from Source artifactory
         run: |
           jf c s
-          export JFROG_CLI_PLUGINS_SERVER=$jpdMain
+          export JFROG_CLI_PLUGINS_SERVER=$jpdDR
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
           jf plugin install ${cliPluginName}@${cliPluginVersion}
