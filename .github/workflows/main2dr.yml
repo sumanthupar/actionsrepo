@@ -32,6 +32,9 @@ jobs:
 
       - name: read all the values from values.env and store it in Github env
         run: |
+          echo "#########"
+          cat status.txt
+          echo "#########"
           #Read from file status.txt
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
