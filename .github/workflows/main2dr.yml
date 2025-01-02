@@ -30,7 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: 'HEAD'
+          ref: 'refs/heads/main'
 
       - name: read all the values from values.env and store it in Github env
         run: |
