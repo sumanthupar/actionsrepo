@@ -79,6 +79,7 @@ jobs:
         with:
           oidc-provider-name: sumgithub
           custom-server-id: ${{ env.jpdMain }}
+          version: 2.72.4
 
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
@@ -88,6 +89,7 @@ jobs:
          with:
            oidc-provider-name: destgithub
            custom-server-id: ${{ env.jpdDr }}
+           version: 2.72.4
 
       - name: print jf c s
         run: |
@@ -133,10 +135,10 @@ jobs:
           jf plugin install ${projectPluginName}@${projectPluginVersion}
            
 
-#     - name: CreateUpdateProjects
-#       run: |
-#          jf ${projectPluginName} diff $jpdMain $jpdDr
-#          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
+     - name: CreateUpdateProjects
+       run: |
+          jf ${projectPluginName} diff create $jpdMain $jpdDr
+          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
 
 #      - name: createLocalRepositories
 #        run: |
