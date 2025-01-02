@@ -93,8 +93,8 @@ jobs:
 
       - name: Check conditions before proceeding
         run: |
-          set +e
-          requestDateTime=$requestDateTime
+          set -x
+          #requestDateTime=$requestDateTime
           echo "requestDateTime $requestDateTime"
           if [ $requestDateTime == "" ]; then 
             echo "[WARN] requestDateTime properties could NOT be found . Check if the Health Check pipeline has run on the DR side"
