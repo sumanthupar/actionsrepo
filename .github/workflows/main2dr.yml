@@ -132,13 +132,14 @@ jobs:
           set +e
           jf c s
           
-          export JFROG_CLI_PLUGINS_SERVER=$jpdDR
+          export JFROG_CLI_PLUGINS_SERVER=$jpdDr
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
           sleep 1
           echo "JFROG_CLI_PLUGINS_SERVER $JFROG_CLI_PLUGINS_SERVER"
           echo "JFROG_CLI_PLUGINS_REPO $JFROG_CLI_PLUGINS_REPO"
           echo "cliPluginName $cliPluginName"
+          echo "jpdDr $jpdDr"
           jf plugin install $cliPluginName@$cliPluginVersion
            
 
