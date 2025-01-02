@@ -151,20 +151,21 @@ jobs:
 #
       - name: createLocalRepositories
         run: |     
+          curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s
           for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
+            echo "projName $projName"
             jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
           done
           jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false
-#
-#      - name: createRemoteRepositories
-#        if: success()
-#        run: |
-#          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
-#          do
-#                jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
-#          done
-#          jf $cliPluginName create remote $jpdMain $jpdDr  --dry-run=false --inventory=false
+
+      - name: createRemoteRepositories
+        run: |
+          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          do
+                jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
+          done
+          jf $cliPluginName create remote $jpdMain $jpdDr  --dry-run=false --inventory=false
 #
 #     - name: createVirtualRepositories
 #        if: success()
