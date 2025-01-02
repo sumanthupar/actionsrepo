@@ -129,11 +129,17 @@ jobs:
           
       - name: Download and install plugin from Source artifactory
         run: |
+          set +e
           jf c s
+          
           export JFROG_CLI_PLUGINS_SERVER=$jpdDR
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
-          jf plugin install ${cliPluginName}@${cliPluginVersion}
+          sleep 1
+          echo "JFROG_CLI_PLUGINS_SERVER $JFROG_CLI_PLUGINS_SERVER"
+          echo "JFROG_CLI_PLUGINS_REPO $JFROG_CLI_PLUGINS_REPO"
+          echo "cliPluginName $cliPluginName"
+          jf plugin install $cliPluginName@$cliPluginVersion
            
 
 #      - name: CreateUpdateProjects
