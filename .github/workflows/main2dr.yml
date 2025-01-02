@@ -34,9 +34,6 @@ jobs:
 
       - name: read all the values from values.env and store it in Github env
         run: |
-          echo "#########"
-          cat status.txt
-          echo "#########"
           #Read from file status.txt
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
@@ -98,7 +95,7 @@ jobs:
 
       - name: Check conditions before proceeding
         run: |
-          set -x
+          set +e
           #requestDateTime=$requestDateTime
           echo "requestDateTime $requestDateTime"
           if [ $requestDateTime == "" ]; then 
@@ -112,16 +109,12 @@ jobs:
           fi
           epochNow=$(date +%s)
           interval=$(expr $epochNow - $requestDateTime)
-          echo $epochNow
-          echo $requestDateTime
-          echo "interval $interval"
-          echo "HealthCheckIntervalInSec $HealthCheckIntervalInSec"
           if [ $interval -gt $HealthCheckIntervalInSec ] ; then 
             echo "[ERROR] the last update on the  statusFile  was more than $HealthCheckIntervalInSec seconds."
-            #exit 1
+            exit 1
           fi
-          echo "111"
-          if [ $canUpdateDR == "true" ] ; then
+          
+          if [ $canUpdateDR == "false" ] ; then
             echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
             #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
             curl -X POST \
@@ -131,46 +124,53 @@ jobs:
               -d '{"event_type": "trigger-my-workflow"}'
             exit 2
           fi
+          
+      - name: Download and install plugin from Source artifactory
+        run: |
+          export JFROG_CLI_PLUGINS_SERVER=$jpdDr
+          export JFROG_CLI_PLUGINS_REPO=$automationRepo
+          jf plugin install ${projectPluginName}@${projectPluginVersion}
+           
 
-#      - name: CreateUpdateProjects
-#        run: |
-#	  ###TBD
-#          /root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
-#
+#     - name: CreateUpdateProjects
+#       run: |
+#          jf ${projectPluginName} diff $jpdMain $jpdDr
+#          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
+
 #      - name: createLocalRepositories
-#	if: success()
 #        run: |
-#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
-#	  do
-#		jf {{ .Values.cliPlugin.name }} create local {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#          API_KEY=${{ secrets.MAINJF_API }}         
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+#	         do
+#		         jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
 #          done
-#          jf {{ .Values.cliPlugin.name }} create local {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false
 #
 #      - name: createRemoteRepositories
 #        if: success()
 #        run: |
-#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
 #          do
-#                jf {{ .Values.cliPlugin.name }} create remote {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#                jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
 #          done
-#          jf {{ .Values.cliPlugin.name }} create remote {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#          jf $cliPluginName create remote $jpdMain $jpdDr  --dry-run=false --inventory=false
 #
 #     - name: createVirtualRepositories
 #        if: success()
 #        run: |
-#          for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key')
+#          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
 #          do
-#                jf {{ .Values.cliPlugin.name }} create virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false --inventory=false
+#                jf $cliPluginName create virtual $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
 #          done
-#          jf {{ .Values.cliPlugin.name }} create virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }}  --dry-run=false --inventory=false
+#          jf $cliPluginName create virtual $jpdMain $jpdDr  --dry-run=false --inventory=false
 #
 #     - name: UpdateLocalRepositories
 #       run: |
 #         i=0
 #         N=50
-#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key'); do
 #	 do
-#		jf {{ .Values.cliPlugin.name }} update local {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#		jf $cliPluginName update local $jpdMain $jpdDr --project-key=$projName --dry-run=false &
 #		i=`expr $i + 1`
 #		if [[ `expr $i % $N` == 0 ]]; then
 #			wait
@@ -182,9 +182,9 @@ jobs:
 #       run: |
 #         i=0
 #         N=50
-#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key'); do
 #         do
-#                jf {{ .Values.cliPlugin.name }} update remote {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#                jf $cliPluginName update remote $jpdMain $jpdDr --project-key=$projName --dry-run=false &
 #                i=`expr $i + 1`
 #                if [[ `expr $i % $N` == 0 ]]; then
 #                        wait
@@ -196,9 +196,9 @@ jobs:
 #       run: |
 #         i=0
 #         N=50
-#         for projName in $(curl -XGET -H "Authorization: Bearer ${!token}" "${!url}/access/api/v1/projects" -s | jq -r '.[].project_key'); do
+#         for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key'); do
 #         do
-#                jf {{ .Values.cliPlugin.name }} update virtual {{ .Values.jpdMain }} {{ .Values.jpdDr }} --project-key=$projName --dry-run=false &
+#                jf $cliPluginName update virtual $jpdMain $jpdDr --project-key=$projName --dry-run=false &
 #                i=`expr $i + 1`
 #                if [[ `expr $i % $N` == 0 ]]; then
 #                        wait
