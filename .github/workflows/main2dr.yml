@@ -5,10 +5,10 @@ name: CI
 # Controls when the workflow will run
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+#  push:
+ #   branches: [ "main" ]
+ # pull_request:
+  #  branches: [ "main" ]
 #  schedule:
 #    - cron: "* */2 * * *" ##Running every 15min
 
