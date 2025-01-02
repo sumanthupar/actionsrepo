@@ -133,23 +133,22 @@ jobs:
           export JFROG_CLI_PLUGINS_SERVER=$jpdMain
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
-          jf plugin install ${projectPluginName}@${projectPluginVersion}
+          jf plugin install ${cliPluginName}@${cliPluginVersion}
            
 
-      - name: CreateUpdateProjects
-        run: |
-          export JFROG_CLI_LOG_LEVEL=DEBUG
-          jf ${projectPluginName} diff create $jpdMain $jpdDr
-          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
-
-#      - name: createLocalRepositories
+#      - name: CreateUpdateProjects
 #        run: |
-#          API_KEY=${{ secrets.MAINJF_API }}         
-#          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
-#	         do
-#		         jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
-#          done
-#          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false
+#          export JFROG_CLI_LOG_LEVEL=DEBUG
+#          jf ${projectPluginName} diff create $jpdMain $jpdDr
+#          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
+#
+      - name: createLocalRepositories
+        run: |     
+          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          do
+            jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
+          done
+          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false
 #
 #      - name: createRemoteRepositories
 #        if: success()
