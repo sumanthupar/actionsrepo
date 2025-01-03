@@ -136,15 +136,16 @@ jobs:
           sleep 1
           jf plugin install $cliPluginName@$cliPluginVersion
           sleep 1
-          jf plugin install $cliPluginName@$cliPluginVersion
+          jf plugin install $projectPluginName@$projectPluginVersion
+          sleep 1
            
 
-#      - name: CreateUpdateProjects
-#        run: |
-#          export JFROG_CLI_LOG_LEVEL=DEBUG
-#          jf ${projectPluginName} diff create $jpdMain $jpdDr
-#          #/root/.jfrog/plugins/proj-sync/bin/$ diff create {{ .Values.jpdMain }} {{ .Values.jpdDr }}
-#
+      - name: CreateUpdateProjects
+        run: |
+          export JFROG_CLI_LOG_LEVEL=DEBUG
+          #jf ${projectPluginName} diff create $jpdMain $jpdDr
+          /root/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
+
       - name: createLocalRepositories
         run: |
           for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
