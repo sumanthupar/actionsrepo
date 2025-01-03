@@ -144,9 +144,10 @@ jobs:
         run: |
           export JFROG_CLI_LOG_LEVEL=DEBUG
           id 
+          pwd
           #jf ${projectPluginName} diff create $jpdMain $jpdDr
           ls -ltr /root/.jfrog/plugins/proj-sync/bin/
-          /root/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
+          ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
 
       - name: createLocalRepositories
         run: |
