@@ -125,7 +125,7 @@ jobs:
           jf plugin install $cliPluginName@$cliPluginVersion
           sleep 1
           jf plugin install $projectPluginName@$projectPluginVersion
-          sleep 1
+          
            
 
 #      - name: CreateUpdateProjects
