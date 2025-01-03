@@ -174,7 +174,7 @@ jobs:
         run: |
           i=0
           N=50
-          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key'); do
+          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName update remote $jpdMain $jpdDr --project-key=$projName --dry-run=false &
                 i=`expr $i + 1`
@@ -187,7 +187,7 @@ jobs:
         run: |
           i=0
           N=50
-          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key'); do
+          for projName in $(curl -XGET -H "Authorization: Bearer ${API_KEY}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName update virtual $jpdMain $jpdDr --project-key=$projName --dry-run=false &
                 i=`expr $i + 1`
