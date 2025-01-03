@@ -146,7 +146,7 @@ jobs:
           id 
           pwd
           #jf ${projectPluginName} diff create $jpdMain $jpdDr
-          ls -ltr /root/.jfrog/plugins/proj-sync/bin/
+          #ls -ltr /root/.jfrog/plugins/proj-sync/bin/
           ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
 
       - name: createLocalRepositories
