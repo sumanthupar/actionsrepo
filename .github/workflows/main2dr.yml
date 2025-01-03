@@ -1,8 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
+name: main2dr
 on:
   workflow_dispatch:
 #  push:
@@ -16,7 +12,6 @@ permissions:
   id-token: write
   contents: write
   
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -29,7 +24,6 @@ jobs:
       DRUSERNAME: ${{ secrets.DRJF_USERNAME }}
       DRAPI_KEY: ${{ secrets.DRJF_API }}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
@@ -37,7 +31,7 @@ jobs:
         with:
           ref: 'refs/heads/main'
 
-      - name: read all the values from values.env and store it in Github env
+      - name: read all the values from values.env and status.txt and store it in Github env variable
         run: |
           #Read from file status.txt
           while IFS='=' read -r key value; do
@@ -49,22 +43,16 @@ jobs:
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
           
-      - name: Ping check to artifactory
+      - name: Ping check to artifactory both main and dr
         run: |
           ##Setting below to avoid failing complete pipeline
           set +e
           ###Ping check to SAAS_MAIN
-          #USERNAME=${{ secrets.MAINJF_USERNAME }}
-          #API_KEY=${{ secrets.MAINJF_API }}
-          #ARTIFACTORY_URL=${{ vars.MAINJF_URL }}
           ARTIFACTORY_URL=${{ env.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_DR
-          #DRUSERNAME=${{ secrets.DRJF_USERNAME }}
-          #DRAPI_KEY=${{ secrets.DRJF_API }}
-          #DRARTIFACTORY_URL=${{ vars.DRF_URL }}
           DRARTIFACTORY_URL=${{ env.DRJF_URL }}
           responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
@@ -94,7 +82,7 @@ jobs:
            custom-server-id: ${{ env.jpdDr }}
            version: 2.72.4
 
-      - name: print jf c s
+      - name: print configured JFrog CLIs details
         run: |
           jf c s
 
@@ -127,7 +115,7 @@ jobs:
             exit 2
           fi
           
-      - name: Download and install plugin from Source artifactory
+      - name: Download and install plugin proj-sync and repo-sync from DR artifactory
         run: |
           set +e
           export JFROG_CLI_PLUGINS_SERVER=$jpdDr
@@ -140,14 +128,10 @@ jobs:
           sleep 1
            
 
-      - name: CreateUpdateProjects
-        run: |
-          export JFROG_CLI_LOG_LEVEL=DEBUG
-          id 
-          pwd
-          #jf ${projectPluginName} diff create $jpdMain $jpdDr
-          #ls -ltr /root/.jfrog/plugins/proj-sync/bin/
-          ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
+#      - name: CreateUpdateProjects
+#        run: |
+#          export JFROG_CLI_LOG_LEVEL=DEBUG
+#          ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
 
       - name: createLocalRepositories
         run: |
