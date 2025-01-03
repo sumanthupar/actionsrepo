@@ -31,7 +31,7 @@ jobs:
         with:
           ref: 'refs/heads/main'
 
-      - name: read all the values from values.env and status.txt and store it in Github env variable
+      - name: Read all the values from values.env and status.txt and store it in Github env variable
         run: |
           #Read from file status.txt
           while IFS='=' read -r key value; do
@@ -157,7 +157,7 @@ jobs:
           done
           jf $cliPluginName create virtual $jpdMain $jpdDr  --dry-run=false --inventory=false
 
-      - name: UpdateRemoteRepositories
+      - name: UpdateLocalRepositories
         run: |
           i=0
           N=50
@@ -167,7 +167,6 @@ jobs:
                 i=`expr $i + 1`
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
-                fi
                 fi
           done
           
@@ -182,7 +181,6 @@ jobs:
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
                 fi
-                fi
           done
 
       - name: UpdateVirtualRepositories
@@ -195,6 +193,5 @@ jobs:
                 i=`expr $i + 1`
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
-                fi
                 fi
           done
