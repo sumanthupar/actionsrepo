@@ -71,7 +71,7 @@ jobs:
         with:
           oidc-provider-name: sumgithub
           custom-server-id: ${{ env.jpdMain }}
-          version: 2.72.4
+          version: ${{ env.JFCliVersion }}
 
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
@@ -80,7 +80,7 @@ jobs:
          with:
            oidc-provider-name: destgithub
            custom-server-id: ${{ env.jpdDr }}
-           version: 2.72.4
+           version: ${{ env.JFCliVersion }}
 
       - name: print configured JFrog CLIs details
         run: |
