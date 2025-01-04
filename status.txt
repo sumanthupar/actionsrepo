@@ -1,5 +1,5 @@
 # EXAMPLE OF YAML FILE THE PIPELINE WILL OUTPUT
-canUpdateDR=true
+canUpdateDR=false
 # Tuesday, 20 September 2022 14:17:04.490
 lastHeartBeatFromMain=1736011354
 requestDateTime=1736011354
