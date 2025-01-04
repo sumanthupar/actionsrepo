@@ -159,3 +159,25 @@ jobs:
                         wait
                 fi
           done
+          
+      - name: Update status.yaml
+        run: |
+          epochNow=$(date +%s)
+          if [ "$main_status" == "success" ];then
+            sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
+            sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
+          else
+            sed -i "s/canUpdateDR=.*/canUpdateDR=false/" status.txt
+            #sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
+          fi
+          
+      - name: Commit changes
+        run: |
+          git config user.name "sumanthupar"
+          git config user.email "sumanthupar@gmail.com"
+          git pull -f
+          git add status.txt
+          git commit -m "Update as per pipeline"
+          git push origin main
