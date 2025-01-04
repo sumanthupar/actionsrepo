@@ -25,7 +25,7 @@ jobs:
       DRAPI_KEY: ${{ secrets.DRJF_API }}
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
         uses: actions/checkout@v4
         with:
