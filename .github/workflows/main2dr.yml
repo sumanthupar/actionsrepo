@@ -49,12 +49,12 @@ jobs:
           set +e
           ###Ping check to SAAS_MAIN
           ARTIFACTORY_URL=${{ env.MAINJF_URL }}
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$USERNAME:$API_KEY" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$response" -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
           
           ###Ping check to SAAS_DR
           DRARTIFACTORY_URL=${{ env.DRJF_URL }}
-          responsedr=$(curl -s -o /dev/null -w "%{http_code}" -u "$DRUSERNAME:$DRAPI_KEY" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          responsedr=$(curl -s -o /dev/null -w "%{http_code}" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
           [ "$responsedr" -eq 200 ] && dr_status=success || dr_status=fail
  
       - name: Fail workflow if SAAS main is down
