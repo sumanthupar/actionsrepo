@@ -12,12 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: myenv
-    env:
-      USERNAME: ${{ secrets.MAINJF_USERNAME }}
-      API_KEY: ${{ secrets.MAINJF_API }}
-      DRUSERNAME: ${{ secrets.DRJF_USERNAME }}
-      DRAPI_KEY: ${{ secrets.DRJF_API }}
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,6 +63,7 @@ jobs:
 
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
+         id: setup-cli-dr
          env:  
            JF_URL: ${{ env.DRJF_URL }}
          with:
@@ -99,7 +95,7 @@ jobs:
 
       - name: createLocalRepositories
         run: |
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
             jf $cliPluginName create local $jpdDr $jpdMain --project-key=$projName --dry-run=false --inventory=false
           done
@@ -107,7 +103,7 @@ jobs:
 
       - name: createRemoteRepositories
         run: |
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName create remote $jpdDr $jpdMain --project-key=$projName --dry-run=false --inventory=false
           done
@@ -115,7 +111,7 @@ jobs:
 
       - name: createVirtualRepositories
         run: |
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
             jf $cliPluginName create virtual $jpdDr $jpdMain --project-key=$projName --dry-run=false --inventory=false
           done
@@ -125,7 +121,7 @@ jobs:
         run: |
           i=0
           N=50
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName update local $jpdDr $jpdMain --project-key=$projName --dry-run=false &
                 i=`expr $i + 1`
@@ -138,7 +134,7 @@ jobs:
         run: |
           i=0
           N=50
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName update remote $jpdDr $jpdMain --project-key=$projName --dry-run=false &
                 i=`expr $i + 1`
@@ -151,7 +147,7 @@ jobs:
         run: |
           i=0
           N=50
-          for projName in $(curl -XGET -H "Authorization: Bearer ${DRAPI_KEY}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
+          for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-dr.outputs.oidc-token }}" "${DRJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
                 jf $cliPluginName update virtual $jpdDr $jpdMain --project-key=$projName --dry-run=false &
                 i=`expr $i + 1`
