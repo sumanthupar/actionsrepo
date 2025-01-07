@@ -118,7 +118,7 @@ jobs:
       - name: Download and install plugin proj-sync and repo-sync from DR artifactory
         run: |
           set +e
-          export JFROG_CLI_PLUGINS_SERVER=$jpdDr
+          export JFROG_CLI_PLUGINS_SERVER=$jpdMain
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
           sleep 1
