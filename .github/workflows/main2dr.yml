@@ -124,10 +124,10 @@ jobs:
           
            
 
-#      - name: CreateUpdateProjects
-#        run: |
-#          export JFROG_CLI_LOG_LEVEL=DEBUG
-#          ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
+      - name: CreateUpdateProjects
+        run: |
+          export JFROG_CLI_LOG_LEVEL=DEBUG
+          ~/.jfrog/plugins/proj-sync/bin/${projectPluginName} diff create $jpdMain $jpdDr
 
       - name: createLocalRepositories
         run: |
