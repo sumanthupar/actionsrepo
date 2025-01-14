@@ -1,5 +1,3 @@
 canUpdateDR=true
 lastHeartBeatFromMain=1736704509
 requestDateTime=1736704509
-from=SAAS_DRnew
-to=SAAS_MAINnew
