@@ -1,3 +1,0 @@
-canUpdateDR=true
-lastHeartBeatFromMain=1736704509
-requestDateTime=1736704509
