@@ -1,4 +1,0 @@
-canUpdateDR=true
-lastHeartBeatFromMain=1737710210
-requestDateTime=1737710210
-testvar=testvalue
