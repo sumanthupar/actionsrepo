@@ -66,13 +66,12 @@ jobs:
         run: |
           jf rt dl $automationRepo/status.txt . 
 
-      - name: read all the values from values.env and store it in Github env
+      - name: read all the values from status.txt and store it in Github env
         run: |
           #Read from file status.txt
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
           done < status.txt
-
 
       - name: Update status.yaml
         run: |
@@ -89,19 +88,9 @@ jobs:
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
           fi
       
-      - name: Upload file status.txt from local to repo
+      - name: Upload updated file status.txt from local to Artifactory Repo
         run: |
           jf rt u status.txt $automationRepo/
-
-          
-#      - name: Commit changes
- #       run: |
-  #        git config user.name "sumanthupar"
-   #       git config user.email "sumanthupar@gmail.com"
-    #      git pull -f
-     #     git add status.txt
-      #    git commit -m "Update as per pipeline"
-       #   git push origin main
 
 
            
