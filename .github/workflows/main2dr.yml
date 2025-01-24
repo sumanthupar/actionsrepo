@@ -27,12 +27,7 @@ jobs:
           ref: 'refs/heads/main'
 
       - name: Read all the values from values.env and status.txt and store it in Github env variable
-        run: |
-          #Read from file status.txt
-          while IFS='=' read -r key value; do
-          echo "$key=$value" >> $GITHUB_ENV
-          done < status.txt
-          
+        run: |          
           #Read from file values.env
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
@@ -77,6 +72,17 @@ jobs:
            oidc-provider-name: sumgithub
            custom-server-id: ${{ env.jpdDr }}
            version: ${{ env.JFCliVersion }}
+      
+      - name: Download file status.txt from repo
+        run: |
+          jf rt dl $automationRepo/status.txt . --server-id=$jpdDr 
+
+      - name: read all the values from status.txt and store it in Github env
+        run: |
+          #Read from file status.txt
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < status.txt
 
       - name: print configured JFrog CLIs details
         run: |
