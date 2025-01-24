@@ -65,8 +65,6 @@ jobs:
       - name: Download file status.txt from repo
         run: |
           jf rt dl $automationRepo/status.txt . 
-          cat status.txt
-          exit 1
 
       - name: read all the values from values.env and store it in Github env
         run: |
@@ -79,6 +77,7 @@ jobs:
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
+          echo "canUpdateDR $canUpdateDR"
           #canUpdateDRFromFile=$canUpdateDR
           if [ "$main_status" == "success" -a  $canUpdateDR == "true" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
@@ -89,15 +88,20 @@ jobs:
             #sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
             sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
           fi
-          
-      - name: Commit changes
+      
+      - name: Upload file status.txt from local to repo
         run: |
-          git config user.name "sumanthupar"
-          git config user.email "sumanthupar@gmail.com"
-          git pull -f
-          git add status.txt
-          git commit -m "Update as per pipeline"
-          git push origin main
+          jf rt u status.txt $automationRepo/
+
+          
+#      - name: Commit changes
+ #       run: |
+  #        git config user.name "sumanthupar"
+   #       git config user.email "sumanthupar@gmail.com"
+    #      git pull -f
+     #     git add status.txt
+      #    git commit -m "Update as per pipeline"
+       #   git push origin main
 
 
            
