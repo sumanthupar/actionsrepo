@@ -34,12 +34,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: read all the values from values.env and store it in Github env
-        run: |
-          #Read from file status.txt
-          while IFS='=' read -r key value; do
-          echo "$key=$value" >> $GITHUB_ENV
-          done < status.txt
-          
+        run: |          
           #Read from file values.env
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
@@ -57,7 +52,30 @@ jobs:
           ARTIFACTORY_URL=${{ env.MAINJF_URL }}
           response=$(curl -s -o /dev/null -w "%{http_code}" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
-          
+
+      -  name: Setup JFrog CLI SAAS DR
+         uses: jfrog/setup-jfrog-cli@v4
+         env:  
+           JF_URL: ${{ env.DRJF_URL }}
+         with:
+           oidc-provider-name: sumgithub
+           custom-server-id: ${{ env.jpdDr }}
+           version: ${{ env.JFCliVersion }}
+           
+      - name: Download file status.txt from repo
+        run: |
+          jf rt dl $automationRepo/status.txt . 
+          cat status.txt
+          exit
+
+      - name: read all the values from values.env and store it in Github env
+        run: |
+          #Read from file status.txt
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < status.txt
+
+
       - name: Update status.yaml
         run: |
           epochNow=$(date +%s)
