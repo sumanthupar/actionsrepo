@@ -176,4 +176,4 @@ jobs:
           
       - name: Upload updated file status.txt from local to Artifactory Repo
         run: |
-          jf rt u status.txt $automationRepo/
+          jf rt u status.txt $automationRepo/ --server-id=$jpdDr
