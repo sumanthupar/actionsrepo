@@ -6,7 +6,7 @@ on:
  # pull_request:
   #  branches: [ "main" ]
 #  schedule:
-#    - cron: "* */2 * * *" ##Running every 15min
+#    - cron: "* */2 * * *" ##Running every 2 hours
 
 permissions:
   id-token: write
