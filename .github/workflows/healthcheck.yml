@@ -77,6 +77,7 @@ jobs:
         run: |
           epochNow=$(date +%s)
           echo "canUpdateDR $canUpdateDR"
+          echo "epochNow $epochNow"
           #canUpdateDRFromFile=$canUpdateDR
           if [ "$main_status" == "success" -a  $canUpdateDR == "true" ];then
             sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
