@@ -1,0 +1,15 @@
+Pre-requisites:
+Both the JPDs should be able to ping(If its up) from runners
+Runner should have internet connectivity to download and install JF CLi
+Workflow permissions should have Read and Write
+
+How to Use:
+Make sure to configure GitHub OIDC intgeration from JFrog on both the JPDs Main and DR
+Make sure to create repository jfrog-automation in DR site artifactory and plugins proj-sync and repo-sync are available
+Update file values.env accordingly
+Make sure to that following files are available under directory .workflows
+  healthcheck.yml
+  main2dr.yml
+  dr2main.yml
+Generate token from GitHub settings(This is required to call DR2Main workflow using repository_dispatch)
+  After generating the token, Create action secrets called MY_TOKEN
