@@ -109,11 +109,11 @@ jobs:
           if [ $canUpdateDR == "false" ] ; then
             echo "[WARN] File status.txt has : canUpdateDR=false; No sync will be pushed to the DR."
             #curl -XPOST -H "authorization: jfrogPassword_011" https://psemea-pipelines-api.jfrog.io/v1/projectIntegrations/29/hook
-            curl -X POST \
-              -H "Authorization: token ${{ secrets.MY_TOKEN }}" \
-              -H "Accept: application/vnd.github.everest-preview+json" \
-              https://api.github.com/repos/${{ github.repository }}/dispatches \
-              -d '{"event_type": "trigger-my-workflow"}'
+            #curl -X POST \
+            #  -H "Authorization: token ${{ secrets.MY_TOKEN }}" \
+            #  -H "Accept: application/vnd.github.everest-preview+json" \
+            #  https://api.github.com/repos/${{ github.repository }}/dispatches \
+            #  -d '{"event_type": "trigger-my-workflow"}'
             exit 2
           fi
           
@@ -139,25 +139,25 @@ jobs:
         run: |
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-            jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
+            jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=true --inventory=false
           done
-          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false
+          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=true --inventory=false
 
       - name: createRemoteRepositories
         run: |
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-                jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
+                jf $cliPluginName create remote $jpdMain $jpdDr --project-key=$projName --dry-run=true --inventory=false
           done
-          jf $cliPluginName create remote $jpdMain $jpdDr  --dry-run=false --inventory=false
+          jf $cliPluginName create remote $jpdMain $jpdDr  --dry-run=true --inventory=false
 
       - name: createVirtualRepositories
         run: |
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-            jf $cliPluginName create virtual $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
+            jf $cliPluginName create virtual $jpdMain $jpdDr --project-key=$projName --dry-run=true --inventory=false
           done
-          jf $cliPluginName create virtual $jpdMain $jpdDr  --dry-run=false --inventory=false
+          jf $cliPluginName create virtual $jpdMain $jpdDr  --dry-run=true --inventory=false
 
       - name: UpdateLocalRepositories
         run: |
@@ -165,7 +165,7 @@ jobs:
           N=50
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-                jf $cliPluginName update local $jpdMain $jpdDr --project-key=$projName --dry-run=false &
+                jf $cliPluginName update local $jpdMain $jpdDr --project-key=$projName --dry-run=true &
                 i=`expr $i + 1`
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
@@ -178,7 +178,7 @@ jobs:
           N=50
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-                jf $cliPluginName update remote $jpdMain $jpdDr --project-key=$projName --dry-run=false &
+                jf $cliPluginName update remote $jpdMain $jpdDr --project-key=$projName --dry-run=true &
                 i=`expr $i + 1`
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
@@ -191,7 +191,7 @@ jobs:
           N=50
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
-                jf $cliPluginName update virtual $jpdMain $jpdDr --project-key=$projName --dry-run=false &
+                jf $cliPluginName update virtual $jpdMain $jpdDr --project-key=$projName --dry-run=true &
                 i=`expr $i + 1`
                 if [[ `expr $i % $N` == 0 ]]; then
                         wait
