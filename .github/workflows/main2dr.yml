@@ -60,7 +60,7 @@ jobs:
         env:  
           JF_URL: ${{ env.MAINJF_URL }}
         with:
-          oidc-provider-name: destgithub
+          oidc-provider-name: gitoidc
           custom-server-id: ${{ env.jpdMain }}
           version: ${{ env.JFCliVersion }}
 
@@ -69,7 +69,7 @@ jobs:
          env:  
            JF_URL: ${{ env.DRJF_URL }}
          with:
-           oidc-provider-name: sumgithub
+           oidc-provider-name: gitoidc
            custom-server-id: ${{ env.jpdDr }}
            version: ${{ env.JFCliVersion }}
       
