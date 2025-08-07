@@ -124,9 +124,9 @@ jobs:
           export JFROG_CLI_PLUGINS_REPO=$automationRepo
           export JFROG_CLI_LOG_LEVEL=DEBUG
           sleep 1
-          jf plugin install $cliPluginName@$cliPluginVersion --server-id=$jpdDr
+          jf plugin install $cliPluginName@$cliPluginVersion
           sleep 1
-          jf plugin install $projectPluginName@$projectPluginVersion --server-id=$jpdDr
+          jf plugin install $projectPluginName@$projectPluginVersion
           
            
 
