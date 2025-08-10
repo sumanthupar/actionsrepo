@@ -1,12 +1,12 @@
 name: Main2DR
 on:
-  #workflow_dispatch:
+  workflow_dispatch:
 #  push: ##Running every 6 hours
  #   branches: [ "main" ]
  # pull_request:
   #  branches: [ "main" ]
-  schedule:
-    - cron: "0 */2 * * *" 
+  #schedule:
+   # - cron: "0 */2 * * *" 
 
 permissions:
   id-token: write
