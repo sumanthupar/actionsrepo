@@ -76,14 +76,6 @@ jobs:
           jf rt ping --server-id=$jpdMain
           jf rt ping --server-id=$jpdDr
 
-
-      - name: read all the values from status.txt and store it in Github env
-        run: |
-          #Read from file status.txt
-          while IFS='=' read -r key value; do
-          echo "$key=$value" >> $GITHUB_ENV
-          done < status.txt
-
       - name: print env
         run: |
           cat $GITHUB_ENV
