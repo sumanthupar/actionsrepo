@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Healthcheck
+name: Prereqcheck
 
 # Controls when the workflow will run
 on:
@@ -24,9 +24,6 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment: myenv
-    env:
-      DRUSERNAME: ${{ secrets.DRJF_USERNAME }}
-      USERNAME: ${{ secrets.MAINJF_USERNAME }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -54,6 +51,7 @@ jobs:
           response=$(curl -s -o /dev/null -w "%{http_code}" "${ARTIFACTORY_URL}artifactory/api/system/ping")
           [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
 
+        
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
          env:  
@@ -62,10 +60,22 @@ jobs:
            oidc-provider-name: gitoidc
            custom-server-id: ${{ env.jpdDr }}
            version: ${{ env.JFCliVersion }}
-           
-      - name: Download file status.txt from repo
+
+      - name: Setup JFrog CLI for SAAS main
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli-main
+        env:  
+          JF_URL: ${{ env.MAINJF_URL }}
+        with:
+          oidc-provider-name: gitoidc
+          custom-server-id: ${{ env.jpdMain }}
+          version: ${{ env.JFCliVersion }}
+
+      - name: jf health check to both instances
         run: |
-          jf rt dl $automationRepo/status.txt . 
+          jf rt ping --server-id=$jpdMain
+          jf rt ping --server-id=$jpdDr
+
 
       - name: read all the values from status.txt and store it in Github env
         run: |
@@ -74,25 +84,13 @@ jobs:
           echo "$key=$value" >> $GITHUB_ENV
           done < status.txt
 
-      - name: Update status.yaml
+      - name: print env
         run: |
-          epochNow=$(date +%s)
-          echo "canUpdateDR $canUpdateDR"
-          echo "epochNow $epochNow"
-          #canUpdateDRFromFile=$canUpdateDR
-          if [ "$main_status" == "success" -a  $canUpdateDR == "true" ];then
-            sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
-            sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
-            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
-          else
-            sed -i "s/canUpdateDR=.*/canUpdateDR=false/" status.txt
-            #sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
-            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
-          fi
-      
-      - name: Upload updated file status.txt from local to Artifactory Repo
+          cat $GITHUB_ENV
+
+      - name: Download file status.txt from repo
         run: |
-          jf rt u status.txt $automationRepo/
+          jf rt dl $automationRepo/status.txt . 
 
 
            
