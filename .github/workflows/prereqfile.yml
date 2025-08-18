@@ -90,7 +90,7 @@ jobs:
 
       - name: Download file status.txt from repo
         run: |
-          jf rt dl $automationRepo/status.txt . 
+          jf rt dl $automationRepo/status.txt . --server-id=$jpdDr
 
 
            
