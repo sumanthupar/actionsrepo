@@ -1,0 +1,98 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Healthcheck
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch: 
+  # Triggers the workflow on push or pull request events but only for the "main" branch Running every 15min
+#  push:
+#    branches: [ "main" ]
+#  schedule:
+#    - cron: "*/15 * * * *" 
+  
+  # workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: myenv
+    env:
+      DRUSERNAME: ${{ secrets.DRJF_USERNAME }}
+      USERNAME: ${{ secrets.MAINJF_USERNAME }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: read all the values from values.env and store it in Github env
+        run: |          
+          #Read from file values.env
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < values.env
+
+      - name: Ping check to artifactory
+        run: |
+          set +e
+          ###Ping check to SAAS_DR
+          DRARTIFACTORY_URL=${{ env.DRJF_URL }}
+          responsedr=$(curl -s -o /dev/null -w "%{http_code}" "${DRARTIFACTORY_URL}artifactory/api/system/ping")
+          [ $responsedr -eq 200 ] && echo "dr_status=success" >> $GITHUB_ENV || echo "dr_status=fail" >> $GITHUB_ENV
+          
+          ###Ping check to SAAS_MAIN
+          ARTIFACTORY_URL=${{ env.MAINJF_URL }}
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${ARTIFACTORY_URL}artifactory/api/system/ping")
+          [ $response -eq 200 ] && echo "main_status=success" >> $GITHUB_ENV || echo "main_status=fail" >> $GITHUB_ENV
+
+      -  name: Setup JFrog CLI SAAS DR
+         uses: jfrog/setup-jfrog-cli@v4
+         env:  
+           JF_URL: ${{ env.DRJF_URL }}
+         with:
+           oidc-provider-name: gitoidc
+           custom-server-id: ${{ env.jpdDr }}
+           version: ${{ env.JFCliVersion }}
+           
+      - name: Download file status.txt from repo
+        run: |
+          jf rt dl $automationRepo/status.txt . 
+
+      - name: read all the values from status.txt and store it in Github env
+        run: |
+          #Read from file status.txt
+          while IFS='=' read -r key value; do
+          echo "$key=$value" >> $GITHUB_ENV
+          done < status.txt
+
+      - name: Update status.yaml
+        run: |
+          epochNow=$(date +%s)
+          echo "canUpdateDR $canUpdateDR"
+          echo "epochNow $epochNow"
+          #canUpdateDRFromFile=$canUpdateDR
+          if [ "$main_status" == "success" -a  $canUpdateDR == "true" ];then
+            sed -i "s/canUpdateDR=.*/canUpdateDR=true/" status.txt
+            sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=$epochNow/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
+          else
+            sed -i "s/canUpdateDR=.*/canUpdateDR=false/" status.txt
+            #sed -i "s/lastHeartBeatFromMain=.*/lastHeartBeatFromMain=/" status.txt
+            sed -i "s/requestDateTime=.*/requestDateTime=$epochNow/" status.txt
+          fi
+      
+      - name: Upload updated file status.txt from local to Artifactory Repo
+        run: |
+          jf rt u status.txt $automationRepo/
+
+
+           
