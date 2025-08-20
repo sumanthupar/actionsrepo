@@ -37,6 +37,11 @@ jobs:
           while IFS='=' read -r key value; do
           echo "$key=$value" >> $GITHUB_ENV
           done < values.env
+ 
+      - name: Check jq and sed
+        run: |
+          which jq && jq --version
+          which sed && sed --version
 
       - name: Ping check to artifactory
         run: |
