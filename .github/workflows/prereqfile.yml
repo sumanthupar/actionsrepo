@@ -59,6 +59,7 @@ jobs:
         
       -  name: Setup JFrog CLI SAAS DR
          uses: jfrog/setup-jfrog-cli@v4
+         id: setup-cli-dr
          env:  
            JF_URL: ${{ env.DRJF_URL }}
          with:
@@ -66,6 +67,12 @@ jobs:
            custom-server-id: ${{ env.jpdDr }}
            version: ${{ env.JFCliVersion }}
 
+      - name: Echo OIDC token
+        run: echo "$OIDC_TOKEN"
+        env:
+          OIDC_TOKEN: ${{ steps.setup-cli-dr.outputs.oidc-token }}
+
+          
       - name: Setup JFrog CLI for SAAS main
         uses: jfrog/setup-jfrog-cli@v4
         id: setup-cli-main
