@@ -137,6 +137,13 @@ jobs:
 
       - name: createLocalRepositories
         run: |
+          cat <<EOF > repofile.yml
+          localRepositories:
+          - test-docker-new-qa-local
+          - testgen1
+          EOF
+          jf $cliPluginName create local $jpdMain $jpdDr  --dry-run=false --inventory=false --repo-file repofile.yml
+          exit 1
           for projName in $(curl -XGET -H "Authorization: Bearer ${{ steps.setup-cli-main.outputs.oidc-token }}" "${MAINJF_URL}access/api/v1/projects" -s | jq -r '.[].project_key')
           do
             jf $cliPluginName create local $jpdMain $jpdDr --project-key=$projName --dry-run=false --inventory=false
